@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -33,9 +33,9 @@ io.on("connection", (socket) => {
     const { sender, receiver, message } = data;
     const newMessage = new Message({ sender, receiver, message });
     await newMessage.save();
-  });
 
-  socket.broadcast.emit("receive_message", data);
+    socket.broadcast.emit("receive_message", data);
+  });
 
   socket.on("disconnect", () => {
     console.log("User disconnect", socket.id);
@@ -44,6 +44,7 @@ io.on("connection", (socket) => {
 
 app.get("/messages", async (req, res) => {
   const { sender, receiver } = req.query;
+
   try {
     const messages = await Message.find({
       $or: [
@@ -51,9 +52,12 @@ app.get("/messages", async (req, res) => {
         { sender: receiver, receiver: sender },
       ],
     }).sort({ createdAt: 1 });
+
     res.json(messages);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching messages" });
+    res
+      .status(500)
+      .json({ message: "Error fetching messages", error: error.message });
   }
 });
 
@@ -68,4 +72,4 @@ app.get("/users", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
