@@ -33,4 +33,25 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user)
+      return res
+        .status(400)
+        .json({ message: "User not found. Please register" });
+
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect)
+      return res.status(400).json({ message: "Invalid Credentials" });
+
+    res
+      .status(200)
+      .json({ message: "Login Successful", username: user.username });
+  } catch (error) {
+    res.status(500).json({ message: "Server error while logging in.", error });
+  }
+});
+
 module.exports = router;

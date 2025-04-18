@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -15,6 +16,10 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+UserSchema.methods.comparePasswords = async function (passowrd) {
+  return bcrypt.compare(passowrd, this.password);
+};
 
 const User = mongoose.model("chat-user", UserSchema);
 
