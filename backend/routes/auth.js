@@ -42,7 +42,7 @@ router.post("/login", async (req, res) => {
         .status(400)
         .json({ message: "User not found. Please register" });
 
-    const isPasswordCorrect = await user.comparePassword(password);
+    const isPasswordCorrect = await user.comparePasswords(password);
     if (!isPasswordCorrect)
       return res.status(400).json({ message: "Invalid Credentials" });
 
